@@ -466,6 +466,65 @@ async function directNodeProbe(serverId, port) {
 /* ---------------------------------------------------------
    Traffic Generator Client
 --------------------------------------------------------- */
+function formatDispatchResult(data) {
+    if (!data) return '<span class="text-muted small">No requests dispatched yet.</span>';
+
+    if (Array.isArray(data)) {
+        const total = data.length;
+        const successes = data.filter(d => d.status === 'success' || (d.response && !d.error)).length;
+        const serverCounts = {};
+        let totalLatency = 0;
+        data.forEach(d => {
+            const name = d.server_name || (d.server_id ? `Cloud Server ${d.server_id}` : 'Node');
+            serverCounts[name] = (serverCounts[name] || 0) + 1;
+            totalLatency += (Number(d.response_time) || 0);
+        });
+        const avgLatency = (totalLatency / (total || 1)).toFixed(4);
+
+        const breakdownBadges = Object.entries(serverCounts)
+            .map(([sName, count]) => `<span class="badge bg-dark-subtle text-light border border-secondary me-1 mb-1">${sName}: <strong class="text-info">${count}</strong></span>`)
+            .join('');
+
+        return `
+            <div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-light fw-bold">Batch of ${total} Requests</span>
+                    <span class="badge bg-success-subtle text-success border border-success">${successes}/${total} OK</span>
+                </div>
+                <div class="small text-secondary mb-2">
+                    Average Latency: <strong class="text-light">${avgLatency}s</strong>
+                </div>
+                <div class="small text-secondary mb-1">Load Balanced Distribution:</div>
+                <div class="d-flex flex-wrap">${breakdownBadges}</div>
+            </div>
+        `;
+    }
+
+    const isSuccess = data.status === 'success' || (data.response && !data.error);
+    const serverName = data.server_name || (data.server_id ? `Cloud Server ${data.server_id}` : (isSuccess ? 'Balanced Node' : 'None (503)'));
+    const latency = data.response_time !== undefined ? `${data.response_time}s` : '--';
+    const message = data.response?.message || (data.error ? data.error : (isSuccess ? 'Request processed successfully' : 'Request failed'));
+    const reqId = data.request_id ? data.request_id.substring(0, 8) + '...' : '--';
+
+    return `
+        <div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold text-info">${serverName}</span>
+                <span class="badge ${isSuccess ? 'bg-success-subtle text-success border border-success' : 'bg-danger-subtle text-danger border border-danger'}">${isSuccess ? '200 OK' : 'FAILED'}</span>
+            </div>
+            <div class="small text-secondary mb-1">
+                Roundtrip Latency: <strong class="text-light">${latency}</strong>
+            </div>
+            <div class="small text-secondary mb-2">
+                Request ID: <code>${reqId}</code>
+            </div>
+            <div class="small text-muted border-top border-secondary pt-2">
+                ${message}
+            </div>
+        </div>
+    `;
+}
+
 async function sendClientRequest(count) {
     const btn = document.getElementById(`btn-send-${count}`);
     if (btn) btn.disabled = true;
@@ -477,7 +536,7 @@ async function sendClientRequest(count) {
 
         const resultBox = document.getElementById('last-request-result');
         if (resultBox) {
-            resultBox.innerHTML = `<pre class="mb-0 text-info">${JSON.stringify(data, null, 2)}</pre>`;
+            resultBox.innerHTML = formatDispatchResult(data);
         }
 
         if (count === 1) {
