@@ -1,11 +1,10 @@
-# Dockerfile for Self-Healing Cloud Network — Main Application
-# This is a reference Dockerfile; the main app typically runs on the host
-# while the individual cloud servers run via docker-compose.
+# Dockerfile for Self-Healing Cloud Network - Main Application
+# Runs all 3 simulated cloud servers and the central orchestrator dashboard.
 
 FROM python:3.11-slim
 
 LABEL maintainer="Self-Healing Cloud Network"
-LABEL description="Main application for the Self-Healing Cloud Network"
+LABEL description="Self-Healing Cloud Network with Automatic Failure Detection and Dynamic Load Balancing"
 
 # Set working directory
 WORKDIR /app
@@ -25,17 +24,17 @@ COPY . .
 # Create logs directory
 RUN mkdir -p logs
 
-# Expose the Flask port
+# Expose ports
 EXPOSE 5000
 
 # Environment variables
 ENV FLASK_HOST=0.0.0.0
-ENV FLASK_PORT=5000
+ENV PORT=5000
 ENV PYTHONUNBUFFERED=1
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
     CMD curl -f http://localhost:5000/ || exit 1
 
-# Run the application
-CMD ["python", "app.py"]
+# Run the complete demo (spawns 3 servers + orchestrator)
+CMD ["python", "start_demo.py"]

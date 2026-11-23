@@ -14,7 +14,7 @@ class Config:
 
     # --- Flask Settings ---
     FLASK_HOST = "0.0.0.0"
-    FLASK_PORT = 5000
+    FLASK_PORT = int(os.getenv("PORT", 5000))
     CUSTOM_DOMAIN = os.getenv("CUSTOM_DOMAIN", "selfhealing.local")
     SECRET_KEY = os.getenv("SECRET_KEY", "self-healing-cloud-secret-key-2024")
     FLASK_ENV = os.getenv("FLASK_ENV", "development")

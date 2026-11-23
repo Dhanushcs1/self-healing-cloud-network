@@ -71,3 +71,26 @@ def restart_server(server_id):
         return jsonify(result), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@servers_bp.route('/<int:server_id>/probe', methods=['GET'])
+def probe_server(server_id):
+    """Directly probe the server's /health endpoint from the orchestrator backend."""
+    import time
+    import requests
+    server = ServerModel.get_by_id(server_id)
+    if not server:
+        return jsonify({'error': f'Server {server_id} not found'}), 404
+    url = f"http://{server['host']}:{server['port']}/health"
+    try:
+        start = time.perf_counter()
+        resp = requests.get(url, timeout=3)
+        elapsed = round(time.perf_counter() - start, 4)
+        data = resp.json() if resp.headers.get('content-type', '').startswith('application/json') else {'raw': resp.text}
+        return jsonify({
+            'status_code': resp.status_code,
+            'latency': elapsed,
+            'payload': data
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e), 'status_code': 503}), 503

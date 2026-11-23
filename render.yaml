@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: self-healing-cloud-network
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python start_demo.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true

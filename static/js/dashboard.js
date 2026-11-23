@@ -449,11 +449,15 @@ async function containerAction(serverId, action) {
 async function directNodeProbe(serverId, port) {
     try {
         const start = performance.now();
-        const res = await fetch(`http://localhost:${port}/health`);
+        const res = await fetch(`/api/servers/${serverId}/probe`);
         const elapsed = ((performance.now() - start) / 1000).toFixed(4);
         const data = await res.json();
 
-        alert(`Direct Probe Result for Server ${serverId} (Port ${port}):\nHTTP Status: ${res.status}\nLatency: ${elapsed}s\nPayload: ${JSON.stringify(data, null, 2)}`);
+        if (res.ok) {
+            alert(`Direct Probe Result for Server ${serverId} (Port ${port}):\nHTTP Status: ${data.status_code}\nRoundtrip Latency: ${data.latency || elapsed}s\nPayload: ${JSON.stringify(data.payload, null, 2)}`);
+        } else {
+            alert(`Direct Probe to Server ${serverId} returned status ${res.status}:\n${data.error || 'Server unreachable'}`);
+        }
     } catch (err) {
         alert(`Direct Probe to Server ${serverId} failed:\n${err.message}`);
     }
