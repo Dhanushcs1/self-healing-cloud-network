@@ -562,7 +562,13 @@ async function sendClientRequest(count) {
 
 function addClientTableRow(item) {
     const tbody = document.getElementById('client-requests-table-body');
-    if (!tbody) return;
+    if (!tbody || !item) return;
+
+    // Deduplication guard: prevent duplicate rows from simultaneous WebSocket + HTTP response
+    const reqId = item.request_id || '';
+    if (reqId && tbody.querySelector(`tr[data-req-id="${reqId}"]`)) {
+        return;
+    }
 
     // Remove empty placeholder row
     if (tbody.querySelector('td[colspan="6"]')) {
@@ -570,6 +576,10 @@ function addClientTableRow(item) {
     }
 
     const tr = document.createElement('tr');
+    if (reqId) {
+        tr.setAttribute('data-req-id', reqId);
+    }
+
     const isSuccess = item.status === 'success' || (item.response && !item.error);
     const statusBadge = isSuccess
         ? '<span class="badge bg-success-subtle text-success border border-success">200 OK</span>'
@@ -577,12 +587,12 @@ function addClientTableRow(item) {
 
     const sName = item.server_name || (item.server_id ? `Server ${item.server_id}` : 'None (503)');
     const latency = item.response_time !== undefined ? `${item.response_time}s` : '--';
-    const reqId = item.request_id ? item.request_id.substring(0, 8) + '...' : 'req-local';
+    const displayReqId = reqId ? reqId.substring(0, 8) + '...' : 'req-local';
     const ts = item.timestamp ? (item.timestamp.split('T')[1] || item.timestamp).substring(0, 8) : new Date().toLocaleTimeString();
 
     tr.innerHTML = `
         <td class="text-secondary">${clientRequestIndex++}</td>
-        <td><code>${reqId}</code></td>
+        <td><code>${displayReqId}</code></td>
         <td><strong class="text-info">${sName}</strong></td>
         <td>${latency}</td>
         <td>${statusBadge}</td>
@@ -602,6 +612,7 @@ function clearClientHistory() {
     if (tbody) {
         tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">History cleared.</td></tr>';
     }
+    clientRequestIndex = 1;
 }
 
 /* ---------------------------------------------------------
