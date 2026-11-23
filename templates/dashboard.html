@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Self-Healing Cloud Network | Cloud Operations Center</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="wrapper d-flex">
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header p-3 border-bottom border-secondary">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-cloud-bolt text-primary fs-3"></i>
+                    <div>
+                        <h6 class="mb-0 fw-bold text-white tracking-wide">Self-Healing Cloud Network</h6>
+                        <small class="text-secondary" style="font-size: 0.75rem;">Operations Center</small>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="nav flex-column py-3 sidebar-nav">
+                <li class="nav-item">
+                    <a href="#overview" class="nav-link active" onclick="showSection('overview', event)">
+                        <i class="fa-solid fa-gauge me-2"></i> Overview
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#servers" class="nav-link" onclick="showSection('servers', event)">
+                        <i class="fa-solid fa-server me-2"></i> Server Fleet
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#analytics" class="nav-link" onclick="showSection('analytics', event)">
+                        <i class="fa-solid fa-chart-line me-2"></i> Analytics
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#client" class="nav-link" onclick="showSection('client', event)">
+                        <i class="fa-solid fa-paper-plane me-2"></i> Traffic Generator
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#control" class="nav-link" onclick="showSection('control', event)">
+                        <i class="fa-solid fa-sliders me-2"></i> Chaos & Recovery
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#logs" class="nav-link" onclick="showSection('logs', event)">
+                        <i class="fa-solid fa-list-check me-2"></i> Event Stream
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer p-3 mt-auto border-top border-secondary">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="small text-secondary">Socket.IO State</span>
+                    <span id="socket-badge" class="badge bg-secondary">Connecting...</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <span class="small text-secondary">Load Balancer</span>
+                    <span class="badge bg-primary">Round Robin</span>
+                </div>
+            </div>
+            <div class="footer-links p-3 border-top border-secondary">
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="/privacy">Privacy Policy</a>
+                    <a href="/terms">Terms</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content flex-grow-1 p-4">
+            <!-- Top Navbar / Header -->
+            <header class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom border-secondary">
+                <div>
+                    <h4 class="fw-bold mb-1 text-white" id="page-title">Infrastructure Overview</h4>
+                    <span class="text-secondary small">Autonomous Health Monitoring, Fault Detection & Auto-Recovery</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-secondary small" id="clock-display">--:--:-- UTC</span>
+                    <button class="btn btn-sm btn-outline-info" onclick="manualRefresh()">
+                        <i class="fa-solid fa-rotate me-1"></i> Refresh
+                    </button>
+                </div>
+            </header>
+
+            <!-- SECTION A: OVERVIEW -->
+            <section id="section-overview" class="dashboard-section active">
+                <!-- KPI Summary Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-xl-2 col-md-4 col-sm-6">
+                        <div class="kpi-card card-blue p-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="kpi-label">TOTAL SERVERS</span>
+                                    <h3 class="kpi-value text-white" id="kpi-total-servers">3</h3>
+                                </div>
+                                <div class="kpi-icon"><i class="fa-solid fa-network-wired"></i></div>
+                            </div>
+                            <div class="kpi-footer small text-muted">Configured nodes</div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6">
+                        <div class="kpi-card card-green p-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="kpi-label">HEALTHY</span>
+                                    <h3 class="kpi-value text-success" id="kpi-healthy-servers">0</h3>
+                                </div>
+                                <div class="kpi-icon text-success"><i class="fa-solid fa-circle-check"></i></div>
+                            </div>
+                            <div class="kpi-footer small text-muted">Active in LB pool</div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6">
+                        <div class="kpi-card card-red p-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="kpi-label">FAILED</span>
+                                    <h3 class="kpi-value text-danger" id="kpi-failed-servers">0</h3>
+                                </div>
+                                <div class="kpi-icon text-danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            </div>
+                            <div class="kpi-footer small text-muted">Isolated / Offline</div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6">
+                        <div class="kpi-card card-yellow p-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="kpi-label">RECOVERED</span>
+                                    <h3 class="kpi-value text-warning" id="kpi-recovered-servers">0</h3>
+                                </div>
+                                <div class="kpi-icon text-warning"><i class="fa-solid fa-shield-heart"></i></div>
+                            </div>
+                            <div class="kpi-footer small text-muted">Auto-healed events</div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6">
+                        <div class="kpi-card card-cyan p-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="kpi-label">TOTAL REQUESTS</span>
+                                    <h3 class="kpi-value text-info" id="kpi-total-requests">0</h3>
+                                </div>
+                                <div class="kpi-icon text-info"><i class="fa-solid fa-arrows-split-up-and-left"></i></div>
+                            </div>
+                            <div class="kpi-footer small text-muted">Balanced through LB</div>
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-md-4 col-sm-6">
+                        <div class="kpi-card card-teal p-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="kpi-label">AVAILABILITY</span>
+                                    <h3 class="kpi-value text-teal" id="kpi-availability">0.0%</h3>
+                                </div>
+                                <div class="kpi-icon text-teal"><i class="fa-solid fa-heart-pulse"></i></div>
+                            </div>
+                            <div class="kpi-footer small text-muted">Fleet uptime ratio</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Fleet Preview -->
+                <h5 class="fw-bold mb-3 text-white"><i class="fa-solid fa-cubes me-2 text-primary"></i>Server Fleet Snapshot</h5>
+                <div class="row g-3 mb-4" id="fleet-preview-container">
+                    <!-- Populated dynamically by JS -->
+                </div>
+
+                <!-- Mini Analytics & Logs side by side -->
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        <div class="panel-card p-3">
+                            <h6 class="fw-bold text-white mb-3"><i class="fa-solid fa-chart-pie me-2 text-info"></i>Traffic Distribution</h6>
+                            <div style="height: 250px;">
+                                <canvas id="chart-traffic-dist-mini"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="panel-card p-3">
+                            <h6 class="fw-bold text-white mb-3"><i class="fa-solid fa-clock-rotate-left me-2 text-warning"></i>Recent Events</h6>
+                            <div id="mini-event-log" class="overflow-auto" style="height: 250px;">
+                                <div class="text-secondary small text-center py-5">Awaiting live events...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION B: SERVER MONITORING -->
+            <section id="section-servers" class="dashboard-section d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-white mb-0"><i class="fa-solid fa-server me-2 text-success"></i>Server Fleet Telemetry</h5>
+                    <span class="badge bg-dark-subtle text-light border border-secondary">Poll Interval: 5s</span>
+                </div>
+                <div class="row g-3" id="servers-grid">
+                    <!-- Full server cards dynamically injected here -->
+                </div>
+            </section>
+
+            <!-- SECTION C: ANALYTICS -->
+            <section id="section-analytics" class="dashboard-section d-none">
+                <div class="row g-3 mb-4">
+                    <div class="col-lg-8">
+                        <div class="panel-card p-3">
+                            <h6 class="fw-bold text-white mb-3"><i class="fa-solid fa-bolt me-2 text-warning"></i>Response Time Trend (seconds)</h6>
+                            <div style="height: 300px;">
+                                <canvas id="chart-response-time"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="panel-card p-3">
+                            <h6 class="fw-bold text-white mb-3"><i class="fa-solid fa-chart-pie me-2 text-info"></i>Request Distribution</h6>
+                            <div style="height: 300px;">
+                                <canvas id="chart-traffic-dist"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        <div class="panel-card p-3">
+                            <h6 class="fw-bold text-white mb-3"><i class="fa-solid fa-percent me-2 text-success"></i>Server Availability (%)</h6>
+                            <div style="height: 280px;">
+                                <canvas id="chart-availability"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="panel-card p-3">
+                            <h6 class="fw-bold text-white mb-3"><i class="fa-solid fa-microchip me-2 text-primary"></i>Resource Utilization (CPU / RAM %)</h6>
+                            <div style="height: 280px;">
+                                <canvas id="chart-resources"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION D: TRAFFIC GENERATOR (CLIENT) -->
+            <section id="section-client" class="dashboard-section d-none">
+                <div class="row g-3">
+                    <div class="col-lg-4">
+                        <div class="panel-card p-4">
+                            <h5 class="fw-bold text-white mb-3"><i class="fa-solid fa-paper-plane me-2 text-primary"></i>Traffic Client</h5>
+                            <p class="text-secondary small">
+                                Send simulated user requests through the central Load Balancer (<code class="text-info">http://localhost:5000/api/request</code>).
+                                The load balancer distributes traffic evenly across healthy nodes and skips isolated servers.
+                            </p>
+
+                            <div class="d-grid gap-2 my-3">
+                                <button class="btn btn-primary" onclick="sendClientRequest(1)" id="btn-send-1">
+                                    <i class="fa-solid fa-paper-plane me-2"></i> Send 1 Request
+                                </button>
+                                <button class="btn btn-outline-info" onclick="sendClientRequest(5)" id="btn-send-5">
+                                    <i class="fa-solid fa-angles-right me-2"></i> Send 5 Requests
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="sendClientRequest(10)" id="btn-send-10">
+                                    <i class="fa-solid fa-bolt me-2"></i> Send 10 Requests (Round Robin Demo)
+                                </button>
+                            </div>
+
+                            <hr class="border-secondary my-3">
+
+                            <div class="bg-dark p-3 rounded">
+                                <span class="small fw-bold text-light">Last Dispatched Result:</span>
+                                <div id="last-request-result" class="mt-2 text-muted small font-monospace">
+                                    No requests dispatched yet.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-8">
+                        <div class="panel-card p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold text-white mb-0"><i class="fa-solid fa-clock-rotate-left me-2 text-info"></i>Request Dispatch Log</h6>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="clearClientHistory()">Clear</button>
+                            </div>
+                            <div class="table-responsive" style="max-height: 480px;">
+                                <table class="table table-dark table-hover table-sm align-middle">
+                                    <thead>
+                                        <tr class="text-secondary small border-secondary">
+                                            <th>#</th>
+                                            <th>Req ID</th>
+                                            <th>Server Dispatched</th>
+                                            <th>Latency</th>
+                                            <th>Status</th>
+                                            <th>Timestamp</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="client-requests-table-body">
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted py-4">No client requests generated yet.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION E: CONTROL PANEL (CHAOS & RECOVERY) -->
+            <section id="section-control" class="dashboard-section d-none">
+                <div class="panel-card p-3 mb-4">
+                    <h5 class="fw-bold text-white mb-1"><i class="fa-solid fa-sliders me-2 text-danger"></i>Chaos Engineering & Admin Control Panel</h5>
+                    <p class="text-secondary small mb-0">
+                        Manually trigger simulated application failures, stop/start Docker containers, and observe how the Monitoring Engine detects anomalies, isolates the node from the Load Balancer, and initiates the Self-Healing process.
+                    </p>
+                </div>
+
+                <div class="row g-3" id="control-panel-grid">
+                    <!-- Populated dynamically with action buttons for each server -->
+                </div>
+            </section>
+
+            <!-- SECTION F: EVENT LOGS -->
+            <section id="section-logs" class="dashboard-section d-none">
+                <div class="panel-card p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="fw-bold text-white mb-0"><i class="fa-solid fa-list-check me-2 text-warning"></i>System Event Stream</h5>
+                            <small class="text-secondary">Chronological audit log of health probes, failovers, and auto-recoveries</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <select id="log-filter-select" class="form-select form-select-sm bg-dark text-light border-secondary" style="width: 140px;" onchange="filterEventLogs()">
+                                <option value="all">All Events</option>
+                                <option value="failure">Failures</option>
+                                <option value="recovery">Recoveries</option>
+                                <option value="healthy">Healthy</option>
+                            </select>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="clearEventLogs()">Clear</button>
+                        </div>
+                    </div>
+
+                    <div id="full-event-log-container" class="overflow-auto p-2" style="max-height: 550px;">
+                        <!-- Events injected here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Socket.IO Client CDN -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <!-- Dashboard & Charts JS -->
+    <script src="/static/js/charts.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

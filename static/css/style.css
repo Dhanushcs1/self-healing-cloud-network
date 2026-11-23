@@ -1,0 +1,260 @@
+/* ==========================================================================
+   Self-Healing Cloud Network - Operations Center Dark Stylesheet
+   ========================================================================== */
+
+:root {
+    --bg-dark: #0f172a;
+    --sidebar-bg: #1e293b;
+    --card-bg: #1e293b;
+    --card-border: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    --accent-yellow: #f59e0b;
+    --accent-cyan: #06b6d4;
+    --accent-teal: #14b8a6;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    min-width: 250px;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--card-border);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.sidebar-nav .nav-link {
+    color: var(--text-secondary);
+    padding: 0.75rem 1.25rem;
+    font-size: 0.92rem;
+    font-weight: 500;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.sidebar-nav .nav-link:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-nav .nav-link.active {
+    color: #ffffff;
+    background-color: rgba(59, 130, 246, 0.15);
+    border-left-color: var(--accent-blue);
+    font-weight: 600;
+}
+
+/* Main Content */
+.main-content {
+    background-color: var(--bg-dark);
+    min-height: 100vh;
+    overflow-y: auto;
+}
+
+/* KPI Cards */
+.kpi-card {
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    border: 1px solid var(--card-border);
+    border-left-width: 4px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.card-blue { border-left-color: var(--accent-blue); }
+.card-green { border-left-color: var(--accent-green); }
+.card-red { border-left-color: var(--accent-red); }
+.card-yellow { border-left-color: var(--accent-yellow); }
+.card-cyan { border-left-color: var(--accent-cyan); }
+.card-teal { border-left-color: var(--accent-teal); }
+
+.kpi-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+}
+
+.kpi-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0.25rem 0;
+}
+
+.kpi-icon {
+    font-size: 1.4rem;
+    opacity: 0.8;
+}
+
+.text-teal {
+    color: var(--accent-teal) !important;
+}
+
+/* Generic Panel Card */
+.panel-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Server Status Card */
+.server-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    transition: all 0.25s ease;
+    overflow: hidden;
+}
+
+.server-card:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.server-card.status-healthy {
+    border-top: 4px solid var(--accent-green);
+}
+
+.server-card.status-unhealthy,
+.server-card.status-failed {
+    border-top: 4px solid var(--accent-red);
+    animation: pulse-danger 2s infinite;
+}
+
+.server-card.status-recovering {
+    border-top: 4px solid var(--accent-yellow);
+    animation: pulse-warning 2s infinite;
+}
+
+.server-card.status-unknown {
+    border-top: 4px solid var(--text-secondary);
+}
+
+@keyframes pulse-danger {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    50% { box-shadow: 0 0 12px 2px rgba(239, 68, 68, 0.3); }
+}
+
+@keyframes pulse-warning {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+    50% { box-shadow: 0 0 12px 2px rgba(245, 158, 11, 0.3); }
+}
+
+/* Badges */
+.badge-healthy {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid #10b981;
+}
+
+.badge-failed {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+}
+
+.badge-recovering {
+    background-color: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
+}
+
+/* Event Logs Stream */
+.event-item {
+    background-color: rgba(15, 23, 42, 0.6);
+    border-left: 3px solid var(--card-border);
+    border-radius: 4px;
+    padding: 0.6rem 0.8rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.86rem;
+    transition: background-color 0.2s ease;
+}
+
+.event-item:hover {
+    background-color: rgba(15, 23, 42, 0.9);
+}
+
+.event-item.event-healthy {
+    border-left-color: var(--accent-green);
+}
+
+.event-item.event-failure {
+    border-left-color: var(--accent-red);
+}
+
+.event-item.event-recovery {
+    border-left-color: var(--accent-yellow);
+}
+
+.event-item.event-info {
+    border-left-color: var(--accent-blue);
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* Code Snippet */
+code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.85em;
+    padding: 0.2em 0.4em;
+    background-color: #0f172a;
+    border-radius: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .wrapper {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        min-height: auto;
+    }
+}
+
+
+/* Footer Links */
+.footer-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.8rem;
+}
+.footer-links a:hover {
+    color: var(--text-primary);
+}
